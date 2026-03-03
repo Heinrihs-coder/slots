@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>💊 Kama mašīna 💊</title>
+<style>
+    /* Body / overall background */
+    body {
+        margin: 0;
+        padding: 0;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background: #1b1b1b;
+        color: #eee;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        min-height: 100vh;
+    }
+
+    /* Title */
+    h1 {
+        margin-top: 30px;
+        font-size: 3em;
+        color: #00e0ff;
+        text-shadow: 2px 2px 6px #000;
+    }
+
+    /* Coin display */
+    #coins {
+        font-size: 1.5em;
+        margin: 15px;
+        padding: 10px 20px;
+        background: rgba(0, 224, 255, 0.1);
+        border-radius: 12px;
+        box-shadow: 0 0 15px #00e0ff;
+    }
+
+    /* Slot reels */
+    .slot {
+        display: flex;
+        justify-content: center;
+        gap: 25px;
+        font-size: 70px;
+        margin: 25px;
+        padding: 25px;
+        border-radius: 20px;
+        background: rgba(0, 0, 0, 0.3);
+        box-shadow: 0 0 20px #00e0ff inset;
+        height: 100px;
+    }
+
+    /* Individual symbols */
+    .symbol {
+        display: inline-block;
+        font-size: 70px;
+        transition: transform 0.1s ease-in-out;
+    }
+
+    /* Buttons */
+    button {
+        padding: 15px 40px;
+        margin: 10px;
+        font-size: 20px;
+        border: none;
+        border-radius: 15px;
+        cursor: pointer;
+        color: #fff;
+        background: linear-gradient(45deg, #00e0ff, #0044aa);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+    button:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 20px rgba(0,0,0,0.5);
+    }
+
+    /* Result message */
+    #result {
+        margin: 15px;
+        font-size: 1.3em;
+        min-height: 30px;
+        color: #ffdd00;
+        text-shadow: 1px 1px 3px #000;
+    }
+
+    /* Jackpot message */
+    #win-message {
+        position: fixed;
+        top: 0; left: 0;
+        width: 100%; height: 100%;
+        background: rgba(0,0,0,0.95);
+        color: #00e0ff;
+        font-size: 60px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 999;
+        display: none;
+        text-shadow: 2px 2px 10px #000;
+    }
+</style>
+</head>
+<body>
+
+<h1>💊 Kama mašīna 💊</h1>
+
+<div id="coins">Coins: 1000</div>
+
+<div class="slot" id="reels">
+    <span class="symbol">❓</span>
+    <span class="symbol">❓</span>
+    <span class="symbol">❓</span>
+</div>
+
+<div>
+    <button onclick="spin()">SPIN</button>
+    <button onclick="flashScreen()">KAMS</button>
+    <button onclick="restart()">Restart</button>
+</div>
+
+<div id="result"></div>
+<div id="win-message">KAMS ATNACA!</div>
+
+<script>
+const symbols = ["💊","🧪","⚗️","🧬","🩺"];
+let coins = 1000;
+
+function spin() {
+    if (coins <= 0) {
+        document.getElementById("result").innerText = "You have no coins! Press Restart.";
+        return;
+    }
+
+    const reelSpans = document.querySelectorAll("#reels .symbol");
+    const finalResults = [
+        symbols[Math.floor(Math.random() * symbols.length)],
+        symbols[Math.floor(Math.random() * symbols.length)],
+        symbols[Math.floor(Math.random() * symbols.length)]
+    ];
+
+    // Spin animation: every symbol cycles through random symbols
+    reelSpans.forEach((span, index) => {
+        let count = 0;
+        const spinInterval = setInterval(() => {
+            span.textContent = symbols[Math.floor(Math.random() * symbols.length)];
+            span.style.transform = `rotate(${Math.random()*30-15}deg)`; // tiny rotation for realism
+            count++;
+            if (count > 15 + index*5) { // reels stop staggered
+                clearInterval(spinInterval);
+                span.textContent = finalResults[index];
+                span.style.transform = "rotate(0deg)";
+            }
+        }, 50);
+    });
+
+    // Update coins after animation
+    setTimeout(() => {
+        const [r1,r2,r3] = finalResults;
+        if (r1 === r2 && r2 === r3) {
+            coins += 500;
+            document.getElementById("result").innerText = "KAAAMMS +500 coins!";
+        } else if (r1 === r2 || r2 === r3 || r1 === r3) {
+            coins += 300;
+            document.getElementById("result").innerText = "Kams +300 coins!";
+        } else {
+            coins -= 50;
+            document.getElementById("result").innerText = "papisi -50 coins";
+        }
+        document.getElementById("coins").innerText = "Coins: " + coins;
+
+        if (coins >= 10000) {
+            document.getElementById("win-message").style.display = "flex";
+        }
+    }, 1500);
+}
+
+function restart() {
+    coins = 1000;
+    document.getElementById("coins").innerText = "Coins: " + coins;
+    document.querySelectorAll("#reels .symbol").forEach(span => span.textContent = "❓");
+    document.getElementById("result").innerText = "";
+    document.getElementById("win-message").style.display = "none";
+}
+
+function flashScreen() {
+    const flash = document.createElement("div");
+    flash.style.position = "fixed";
+    flash.style.top = "0";
+    flash.style.left = "0";
+    flash.style.width = "100%";
+    flash.style.height = "100%";
+    flash.style.backgroundColor = "white";
+    flash.style.zIndex = "1000";
+    flash.style.opacity = "0.9";
+    document.body.appendChild(flash);
+    setTimeout(() => { document.body.removeChild(flash); }, 200);
+}
+</script>
+
+</body>
+</html>
