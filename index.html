@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Friend Slot Machine</title>
+<style>
+    body {
+        text-align: center;
+        font-family: Arial, sans-serif;
+        background: #111;
+        color: white;
+    }
+    .slot {
+        font-size: 60px;
+        margin: 20px;
+        height: 80px; /* reserve space so it doesn’t jump */
+    }
+    #coins {
+        font-size: 24px;
+        margin: 10px;
+    }
+    button {
+        padding: 15px 30px;
+        font-size: 20px;
+        cursor: pointer;
+        margin: 5px;
+    }
+    #win-message {
+        position: fixed;
+        top:0;
+        left:0;
+        width:100%;
+        height:100%;
+        background: black;
+        color: yellow;
+        font-size: 60px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 999;
+        display: none;
+    }
+    .symbol {
+        display: inline-block;
+        opacity: 0;
+        transform: translateY(-50px);
+        transition: all 0.5s ease;
+    }
+    .symbol.show {
+        opacity: 1;
+        transform: translateY(0);
+    }
+</style>
+</head>
+<body>
+
+<h1>💊 Kama mašīna 💊</h1>
+
+<div id="coins">Coins: 1000</div>
+<div class="slot" id="reels">
+    <span class="symbol">❓</span>
+    <span class="symbol">❓</span>
+    <span class="symbol">❓</span>
+</div>
+
+<button onclick="spin()">SPIN</button>
+<button onclick="flashScreen()">FLASH SCREEN</button>
+<button onclick="restart()">Restart</button>
+
+<div id="result"></div>
+<div id="win-message">KAMS ATNACA!</div>
+
+<script>
+const symbols = ["💊","🧪","⚗️","🧬","🩺"]; 
+let coins = 1000;
+
+function spin() {
+    if (coins <= 0) {
+        document.getElementById("result").innerText = "You have no coins! Press Restart.";
+        return;
+    }
+
+    const reelSpans = document.querySelectorAll("#reels .symbol");
+
+    // Choose random symbols
+    const r1 = symbols[Math.floor(Math.random() * symbols.length)];
+    const r2 = symbols[Math.floor(Math.random() * symbols.length)];
+    const r3 = symbols[Math.floor(Math.random() * symbols.length)];
+
+    // Animate symbols one by one
+    const results = [r1, r2, r3];
+    reelSpans.forEach((span, index) => {
+        span.classList.remove("show"); // reset animation
+        setTimeout(() => {
+            span.textContent = results[index];
+            span.classList.add("show");
+        }, index * 300); // stagger animation by 300ms
+    });
+
+    // Update coins after animation
+    setTimeout(() => {
+        if (r1 === r2 && r2 === r3) {
+            coins += 5000;
+            document.getElementById("result").innerText = "🎉 JACKPOT! +500 coins!";
+        } else if (r1 === r2 || r2 === r3 || r1 === r3) {
+            coins += 300;
+            document.getElementById("result").innerText = "✨ Small win! +300 coins!";
+        } else {
+            coins -= 50;
+            document.getElementById("result").innerText = "💔 You lose! -50 coins";
+        }
+        document.getElementById("coins").innerText = "Coins: " + coins;
+
+        if (coins >= 10000) {
+            document.getElementById("win-message").style.display = "flex";
+        }
+    }, 1000); // wait for animation to finish
+}
+
+function restart() {
+    coins = 1000;
+    document.getElementById("coins").innerText = "Coins: " + coins;
+    const reelSpans = document.querySelectorAll("#reels .symbol");
+    reelSpans.forEach(span => {
+        span.textContent = "❓";
+        span.classList.remove("show");
+    });
+    document.getElementById("result").innerText = "";
+    document.getElementById("win-message").style.display = "none";
+}
+
+function flashScreen() {
+    const flash = document.createElement("div");
+    flash.style.position = "fixed";
+    flash.style.top = "0";
+    flash.style.left = "0";
+    flash.style.width = "100%";
+    flash.style.height = "100%";
+    flash.style.backgroundColor = "white";
+    flash.style.zIndex = "1000";
+    flash.style.opacity = "0.9";
+    document.body.appendChild(flash);
+    setTimeout(() => { document.body.removeChild(flash); }, 200);
+}
+</script>
+
+</body>
+</html>
